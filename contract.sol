@@ -30,7 +30,8 @@ contract School {
 
     struct program {
         uint32 course_code;
-        uint16 max_strenght;
+        uint16 max_strength;
+        uint16 current_strength;
         // we can add constraints like eligibility criterian etc...
     }
 
@@ -48,7 +49,8 @@ contract School {
     uint32 internal staff_strenght = 999;    // to get only 4 digit ids
     string public school_name;
     address internal admin;      // can validate and unenroll students/staff in case situation arises but enrollment is decentralized by student themselves
-    
+    uint32 course_counter=100; 
+
     mapping(uint32 => Student) internal all_students;   // stud_id -> student info
     mapping(address => uint32) internal student_map;    // acct adrs -> stud_id
     mapping(uint32 => Staff) internal all_staff;     // staff_id -> staff info
@@ -100,6 +102,7 @@ contract School {
         _;
     }
 
+    
     // *************** functions to access student record ********************
     // to be edited...
     // functions to be made:
@@ -120,7 +123,7 @@ contract School {
         all_students[stud_id].first_name = _fname;
         all_students[stud_id].last_name = _lname;
         all_students[stud_id].stud_id = stud_id;
-        all_students[stud_id].n_grades = 0;
+        all_students[stud_id].n_grades = 1;
         return stud_id;
         // add time lock so that someone else might not be able to edit the blockchain at same time
     }
@@ -146,7 +149,27 @@ contract School {
     function GetStaffDetails(uint32 _staff_id) public view validStaffId(_staff_id) onlyStaff(_staff_id) returns(string memory, string memory) {
         return (all_staff[_staff_id].first_name, all_staff[_staff_id].last_name);
     }
+    
+    function offer_course(string memory _course,uint32 _id,uint16 max_strength ) public  validStaffId(_id) onlyStaff(_id) {
+        all_staff[_id].n_programs=all_staff[_id].n_programs+1;
 
+        course_codes[_course]=course_counter++;  //maybe course code could be suggested by prof. themselves
+        all_staff[_id].programs_offered.push(program({course_code: course_codes[_course], max_strength: max_strength, current_strength:0}));
+        
+    }
+
+    function enroll_course(string memory _course,uint32 stud_id,uint32 prof_id) public validStudId(stud_id) onlyStudent(stud_id){
+        uint i=0;
+        while(course_codes[_course]!=all_staff[prof_id].programs_offered[i].course_code ){
+            require(i<(all_staff[prof_id].programs_offered).length,"No such course available.");
+           i++;
+        }
+       require( all_staff[prof_id].programs_offered[i].current_strength < all_staff[prof_id].programs_offered[i].max_strength, "No more students are being accepted in this course.");
+       all_staff[prof_id].programs_offered[i].current_strength++;
+       uint n=all_students[stud_id].n_grades;
+       all_students[stud_id].grades[n].courses.push(course({course_code:course_codes[_course],marks:0}));
+       all_students[stud_id].grades[n].n_courses++; // a limit to number of courses that can be taken and what are available   
+    }
     // function editName(string memory _fname, string memory _lname) public {
     //     first_name = _fname;
     //     last_name = _lname;
@@ -166,4 +189,3 @@ contract School {
     //     return marks[msg.sender][sub_code];
     // }
 }
-        
