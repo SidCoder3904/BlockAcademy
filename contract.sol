@@ -124,6 +124,7 @@ contract School {
         all_students[stud_id].last_name = _lname;
         all_students[stud_id].stud_id = stud_id;
         all_students[stud_id].n_grades = 1;
+        all_stuents[stud_id].grades[0].n_courses=0;
         return stud_id;
         // add time lock so that someone else might not be able to edit the blockchain at same time
     }
@@ -170,22 +171,58 @@ contract School {
        all_students[stud_id].grades[n].courses.push(course({course_code:course_codes[_course],marks:0}));
        all_students[stud_id].grades[n].n_courses++; // a limit to number of courses that can be taken and what are available   
     }
-    // function editName(string memory _fname, string memory _lname) public {
-    //     first_name = _fname;
-    //     last_name = _lname;
-    // }
+    function edit_stud_details(uint32 stud_id,string memory new_fname, string memory new_lname, uint8 new_grade ) public  validStudId(stud_id) onlyStudent(stud_id){
+      all_students[stud_id].first_name=new_fname;
+      all_students[stud_id].last_name=new_lname;
+      all_students[stud_id].n_grades = new_grade;
+    }
+    function edit_prof_details(uint32 prof_id,string memory new_fname, string memory new_lname ) public  validStaffId(prof_id) onlyStaff(prof_id){
+      all_staff[prof_id].first_name=new_fname;
+      all_staff[prof_id].last_name=new_lname;
+    }
+     
+    function get_staff_details(uint32 prof_id) public view validStaffId(prof_id) returns(string memory f_name,string memory l_name) {
+     f_name=all_staff[prof_id].first_name;
+     l_name=all_staff[prof_id].last_name;
+    }
+    function get_student_details(uint32 stud_id,uint32 prof_id) public view validStudId(stud_id) returns(string memory f_name,string memory l_name) {
+     if(msg.sender == all_staff[prof_id].acct){
+     f_name=all_students[stud_id].first_name;
+     l_name=all_students[stud_id].last_name;
+     uint8 _grade=all_students[stud_id].n_grades;
+     uint8 i;
+     for(i=0;i<(all_students[stud_id].grades[_grade].n_courses);i++){
+         return all_students[stud_id].grades[_grade].course[i].
+     }
+     }
+     require(msg.sender == all_staff[prof_id].acct);
+    }
 
     // function checkPass(uint256 _marks) public pure returns(bool) {
     //     if(_marks < 33) return false;
     //     return true;
     // }
-    // function setMarks(string memory _fname,string memory _lname,subjects sub_code, uint256 _marks) public onlyProfessor(sub_code) {
-    //     address _address=student[_fname][_lname];
-    //     marks[_address][sub_code]=_marks; 
-    //     isPass = checkPass(_marks);
-    // }
+     function setMarks(uint32 prof_id,string memory _course,uint32 stud_id, uint256 _marks) public validStaffId(prof_id) onlyStaff(prof_id) {
+        uint32 course_code=course_codes[_course];
+        uint i=0;
+        uint8 _grade=all_students[stud_id].n_grades;
+         while(all_students[stud_id].grades[_grade].courses[i].course_code!=course_code){
+            require(i<(all_students[stud_id].grades[_grade].courses).length,"The student is not enrolled in this course.");
+           i++;
+        }
+        all_students[stud_id].grades[_grade].courses[i].marks=_marks;
+     }
 
-    // function getMarks(string memory _fname,string memory _lname,subjects sub_code) public view onlystudent(_fname,_lname) returns(uint256)  {
-    //     return marks[msg.sender][sub_code];
-    // }
+    function getMarks(uint32 stud_id,string memory _course) public view validStudId(stud_id) onlyStudent(stud_id) returns(uint256 _marks)  {
+        uint32 course_code=course_codes[_course];
+        uint i=0;
+        uint8 _grade=all_students[stud_id].n_grades;
+         while(all_students[stud_id].grades[_grade].courses[i].course_code!=course_code){
+            require(i<(all_students[stud_id].grades[_grade].courses).length,"You are not enrolled in this course.");
+           i++;
+        }
+        _marks=all_students[stud_id].grades[_grade].courses[i].marks;
+     }
+
+     
 }
