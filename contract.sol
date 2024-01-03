@@ -181,6 +181,29 @@ contract School {
       all_staff[prof_id].last_name=new_lname;
     }
      
+     
+    function get_staff_details(uint32 prof_id) public view validStaffId(prof_id) returns(string memory f_name,string memory l_name) {
+     f_name=all_staff[prof_id].first_name;
+     l_name=all_staff[prof_id].last_name;
+    }
+    function get_student_details(uint32 stud_id,uint32 prof_id) public view validStudId(stud_id) returns(string memory f_name,string memory l_name) {
+     if(msg.sender == all_staff[prof_id].acct){
+     f_name=all_students[stud_id].first_name;
+     l_name=all_students[stud_id].last_name;
+     uint8 _grade=all_students[stud_id].n_grades;
+     uint8 i;
+     for(i=0;i<(all_students[stud_id].grades[_grade].n_courses);i++){
+         return all_students[stud_id].grades[_grade].course[i].
+     }
+     }
+     require(msg.sender == all_staff[prof_id].acct);
+    }
+
+    // function checkPass(uint256 _marks) public pure returns(bool) {
+    //     if(_marks < 33) return false;
+    //     return true;
+    // }
+ 
     function get_staff_details(uint32 prof_id) public view validStaffId(prof_id) returns(string memory f_name,string memory l_name) {
      f_name=all_staff[prof_id].first_name;
      l_name=all_staff[prof_id].last_name;
@@ -224,5 +247,20 @@ contract School {
         _marks=all_students[stud_id].grades[_grade].courses[i].marks;
      }
 
-     
+    function RemoveStudent(uint32 stud_id) internal {
+        address stud_acct = all_students[stud_id].acct;
+        delete student_map[stud_acct];
+        delete all_students[stud_id];
+    }
+    
+    function RemoveStaff(uint32 staff_id) internal {
+        address staff_acct = all_staff[staff_id].acct;
+        delete staff_map[staff_acct];
+        delete all_staff[staff_id];
+    }
+
+    function Remove(bool is_stud, uint32 id) public onlyAdmin {
+        if(is_stud) RemoveStudent(id);
+        else RemoveStaff(id);
+    }
 }
