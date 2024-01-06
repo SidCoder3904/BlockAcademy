@@ -11,15 +11,9 @@ contract School {
         uint32 staff_id;
         string description;
     }
-
-    struct course {
-        uint32 course_code;    // each subject/course will have unique code
-        uint256 marks;    // can be extended to part wise marks like midsem, endsem, etc
-    }
     
     struct grade {
         uint8 class;    // class like 1,2,...,12 or sem like 1,2,...,8
-        //course[] courses;
         mapping(uint32 => uint256)  courses;
         uint256 n_courses;
     }
@@ -29,11 +23,8 @@ contract School {
         string _name;
         uint32 stud_id;     // students will have their unique identity
         uint8 n_grades;
-        mapping (uint32=>uint256) courses;//  mapping from course codes to marks;
-        mapping(uint8=>uint32[]) grades;//mapping from grades of the student to courses(course_codes) in that grade 
-        mapping(uint8=>uint8) n_courses;//mapping from the grade of student to no. of courses in that that grade;
-        //grade[] grades;
-        // can add more personal details like dob, parents, contact, address etc
+       mapping(uint8 => uint8[]) grade;  //grade(like 1,2,3...) to course_codes in each grade(like 1,2,3...)
+        mapping (uint32 => uint256) marks; //course_code to marks 
     }
 
     struct program {
@@ -57,7 +48,7 @@ contract School {
     uint32 internal staff_strength = 999;    // to get only 4 digit ids
     string public school_name;
     address internal admin;      // can validate and unenroll students/staff in case situation arises but enrollment is decentralized by student themselves
-    uint32 course_counter=100; 
+    uint32 course_counter=0; 
 
     mapping(uint32 => Student) internal all_students;   // stud_id -> student info
     mapping(address => uint32) internal student_map;    // acct adrs -> stud_id
@@ -132,7 +123,7 @@ contract School {
         all_students[stud_id]._name = _name;
         all_students[stud_id].stud_id = stud_id;
         all_students[stud_id].n_grades = 1;
-        all_students[stud_id].n_courses[1]=0;
+        
         return stud_id;
         // add time lock so that someone else might not be able to edit the blockchain at same time
     }
@@ -170,13 +161,9 @@ contract School {
     }
     
     function enroll_course(string memory _course,uint32 stud_id) public validStudId(stud_id) onlyStudent(stud_id) {
-        require(course_data[_course].course_id > 100,"No such course available.");
+        //require(course_data[_course].course_id > 100,"No such course available.");
         require(course_data[_course].current_strength < course_data[_course].max_strength, "No more students are being accepted in this course.");
         course_data[_course].current_strength++;
-        // uint8 n=all_students[stud_id].n_grades;
-        // all_students[stud_id].grades[n].push(course_codes[_course]);
-        // all_students[stud_id].n_courses[n]++;  // a limit to number of courses that can be taken and what are available   
-        // return  all_students[stud_id].n_courses[n]++;
     }
     function edit_stud_details(uint32 stud_id,string memory new_name, uint8 new_grade ) public  validStudId(stud_id) onlyStudent(stud_id){
       all_students[stud_id]._name=new_name;
@@ -186,21 +173,21 @@ contract School {
       all_staff[prof_id]._name=new_name;
     }
      
-   
+    
    
 
     // function checkPass(uint256 _marks) public pure returns(bool) {
     //     if(_marks < 33) return false;
     //     return true;
     // }
-     function setMarks(uint32 prof_id,string memory _course,uint32 stud_id, uint256 _marks) public validStaffId(prof_id) onlyStaff(prof_id) {
+    function setMarks(uint32 prof_id,string memory _course,uint32 stud_id, uint256 _marks) public validStaffId(prof_id) onlyStaff(prof_id) {
         uint32 course_code = course_data[_course].course_id;
-        all_students[stud_id].courses[course_code]=_marks;
+        all_students[stud_id].marks[course_code]=_marks;
      }
 
     function getMarks(uint32 stud_id,string memory _course) public view validStudId(stud_id) onlyStudent(stud_id) returns(uint256 _marks)  {
         uint32 course_code=course_data[_course].course_id;
-        _marks=all_students[stud_id].courses[course_code];
+        _marks=all_students[stud_id].marks[course_code];
      }
 
       function RemoveStudent(uint32 stud_id) internal {
