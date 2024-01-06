@@ -27,13 +27,17 @@ contract School {
         mapping (uint32 => uint256) marks; //course_code to marks 
     }
 
+    struct enrollments {
+        string course_name;
+        uint32[] stud_ids;
+    }
 
     struct Staff {
         address acct;   // maybe we can remove it
         string _name;
         uint32 staff_id;    // staff will have unique id
         uint8 n_programs;
-        string[] courses;
+        enrollments[] courses;
         // can add more personal info like contact, degree etc...
     }
 
@@ -146,7 +150,9 @@ contract School {
     
     function offer_course(string memory _course,uint32 _staff_id,uint32 max_strength, string memory desc ) public  validStaffId(_staff_id) onlyStaff(_staff_id) {
         all_staff[_staff_id].n_programs=all_staff[_staff_id].n_programs+1;
-
+        enrollments memory enrollment;
+        enrollment.course_name = _course; 
+        all_staff[_staff_id].courses.push(enrollment);
         course_data[_course].course_id =course_counter++;  //maybe course code could be suggested by prof. themselves
         course_data[_course].max_strength = max_strength;
         course_data[_course].staff_id = _staff_id;
@@ -160,6 +166,7 @@ contract School {
         //require(course_data[_course].course_id > 100,"No such course available.");
         require(course_data[_course].current_strength < course_data[_course].max_strength, "No more students are being accepted in this course.");
         course_data[_course].current_strength++;
+        all_staff[course_data[_course].staff_id].courses[course_data[_course].course_id].stud_ids.push(stud_id);
     }
     function edit_stud_details(uint32 stud_id,string memory new_name, uint8 new_grade ) public  validStudId(stud_id) onlyStudent(stud_id){
       all_students[stud_id]._name=new_name;
