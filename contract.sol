@@ -98,6 +98,11 @@ contract School {
         require(student_map[msg.sender] == 0);
         _;
     }
+    
+    // *************** events for notice of all ********************
+    event CourseOffered(string course_name, uint32 staff_id, uint32 max_strength, string desc);
+
+    event GradeUpdated();
 
     
     // *************** functions to access student record ********************
@@ -154,7 +159,7 @@ contract School {
         course_data[_course].staff_id = _staff_id;
         course_data[_course].description = desc;
         // all_staff[_staff_id].programs_offered.push(program({course_code: course_data[_course], max_strength: max_strength, current_strength:0}));
-        
+        emit CourseOffered(_course, _staff_id, max_strength, desc);
     }
     
     function enroll_course(string memory _course,uint32 stud_id) public validStudId(stud_id) onlyStudent(stud_id) {
@@ -186,15 +191,14 @@ contract School {
         uint32 _stud_id=1000;
         uint32 _strength=GetSchoolStrength();
         while(_stud_id<(1000+_strength)){
-        uint8 current_grade = all_students[_stud_id].n_grades;
-        uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
-        bool isPass = true;
-        for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
-        if(isPass){
-            all_students[_stud_id].n_grades++;
+            uint8 current_grade = all_students[_stud_id].n_grades;
+            uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
+            bool isPass = true;
+            for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
+            if(isPass) all_students[_stud_id].n_grades++;
+            _stud_id++;
         }
-        _stud_id++;
-        }
+        emit GradeUpdated();
     }
     
     function getGrade(uint32 _stud_id) public view onlyStudent(_stud_id) returns(uint8) {
