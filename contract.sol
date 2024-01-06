@@ -27,12 +27,7 @@ contract School {
         mapping (uint32 => uint256) marks; //course_code to marks 
     }
 
-    struct program {
-        uint32 course_code;
-        uint16 max_strength;
-        uint16 current_strength;
-        // we can add constraints like eligibility criterian etc...
-    }
+   
 
     struct Staff {
         address acct;   // maybe we can remove it
@@ -40,7 +35,6 @@ contract School {
         uint32 staff_id;    // staff will have unique id
         uint8 n_programs;
         string[] courses;
-        program[] programs_offered;  // offered by this prof
         // can add more personal info like contact, degree etc...
     }
 
@@ -138,9 +132,7 @@ contract School {
         all_staff[staff_id].acct = msg.sender;
         all_staff[staff_id]._name = _name;
         all_staff[staff_id].staff_id = staff_id;
-        program memory initial_prog;
-        all_staff[staff_id].programs_offered.push(initial_prog);
-        all_staff[staff_id].n_programs = 1;     // bcoz we have added 
+        
         return staff_id;
         // add time lock so that someone else might not be able to edit the blockchain at same time
     }
@@ -173,7 +165,13 @@ contract School {
       all_staff[prof_id]._name=new_name;
     }
      
-    
+    function get_course_details(string memory _course) public view returns(uint32 course_code,uint32 max_strength,uint32 current_strength,string memory name, string memory description) {
+        course_code = course_data[_course].course_id;
+        max_strength=course_data[_course].max_strength;
+        current_strength=course_data[_course].current_strength;
+        name=all_staff[course_data[_course].staff_id]._name;
+        description=course_data[_course].description;
+    }
    
     function updateGrade(uint32 _stud_id) internal view returns(bool) {
         uint8 current_grade = all_students[_stud_id].n_grades-1;
