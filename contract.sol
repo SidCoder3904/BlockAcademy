@@ -23,10 +23,9 @@ contract School {
         string _name;
         uint32 stud_id;     // students will have their unique identity
         uint8 n_grades;
-       mapping(uint8 => uint32[]) grade;  //grade(like 1,2,3...) to course_codes in each grade(like 1,2,3...)
+       mapping(uint8 => uint32[]) grade;  //grade(like 1,2,3...) to course_codes in each grade(like 100,101,102...)
         mapping (uint32 => uint256) marks; //course_code to marks 
     }
-
 
     struct Staff {
         address acct;   // maybe we can remove it
@@ -41,7 +40,7 @@ contract School {
     uint32 internal staff_strength = 999;    // to get only 4 digit ids
     string public school_name;
     address internal admin;      // can validate and unenroll students/staff in case situation arises but enrollment is decentralized by student themselves
-    uint32 course_counter=0; 
+    uint32 course_counter=100; 
 
     mapping(uint32 => Student) internal all_students;   // stud_id -> student info
     mapping(address => uint32) internal student_map;    // acct adrs -> stud_id
@@ -94,12 +93,8 @@ contract School {
         require(student_map[msg.sender] == 0);
         _;
     }
+
     
-    // *************** events for notice of all ********************
-    event CourseOffered(string course_name, string staff_id, uint32 max_strenght, string desc);
-
-    event GradeUpdated();
-
     // *************** functions to access student record ********************
     // to be edited...
     // functions to be made:
@@ -147,11 +142,11 @@ contract School {
     function offer_course(string memory _course,uint32 _staff_id,uint32 max_strength, string memory desc ) public  validStaffId(_staff_id) onlyStaff(_staff_id) {
         all_staff[_staff_id].n_programs=all_staff[_staff_id].n_programs+1;
 
-        course_data[_course].course_id =course_counter++;  //maybe course code could be suggested by prof. themselves
+        course_data[_course].course_id =course_counter;  //maybe course code could be suggested by prof. themselves
+        course_counter++;
         course_data[_course].max_strength = max_strength;
         course_data[_course].staff_id = _staff_id;
         course_data[_course].description = desc;
-        emit CourseOffered(_course, all_staff[_staff_id]._name, max_strength, desc);
         // all_staff[_staff_id].programs_offered.push(program({course_code: course_data[_course], max_strength: max_strength, current_strength:0}));
         
     }
@@ -159,6 +154,8 @@ contract School {
     function enroll_course(string memory _course,uint32 stud_id) public validStudId(stud_id) onlyStudent(stud_id) {
         //require(course_data[_course].course_id > 100,"No such course available.");
         require(course_data[_course].current_strength < course_data[_course].max_strength, "No more students are being accepted in this course.");
+        all_students[stud_id].grade[all_students[stud_id].n_grades].push(course_data[_course].course_id);
+        all_students[stud_id].marks[course_data[_course].course_id]=0;
         course_data[_course].current_strength++;
     }
     function edit_stud_details(uint32 stud_id,string memory new_name, uint8 new_grade ) public  validStudId(stud_id) onlyStudent(stud_id){
@@ -178,16 +175,18 @@ contract School {
     }
    
     
-    function updateGrade() public onlyAdmin()  {
+    function updateGrade() public  onlyAdmin()  {
         uint32 _stud_id=1000;
         uint32 _strength=GetSchoolStrength();
-        while(_stud_id<=(1000+_strength)){
-            uint8 current_grade = all_students[_stud_id].n_grades-1;
-            uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
-            bool isPass = true;
-            for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
-            if(isPass) all_students[_stud_id].n_grades++;
-            emit GradeUpdated();
+        while(_stud_id<(1000+_strength)){
+        uint8 current_grade = all_students[_stud_id].n_grades;
+        uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
+        bool isPass = true;
+        for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
+        if(isPass){
+            all_students[_stud_id].n_grades++;
+        }
+        _stud_id++;
         }
     }
     
