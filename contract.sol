@@ -2,10 +2,15 @@
 pragma solidity >0.7.0 <=0.8.23;
 
 contract School {
-
-    mapping(string => uint32) internal course_codes;    // maps string course code to number, can be edited only by admin
-
     // ************* custom structures to store students/staff info ****************
+
+    struct CourseData {
+        uint32 course_id;
+        uint32 current_strength;
+        uint32 max_strength;
+        uint32 staff_id;
+        string description;
+    }
 
     struct course {
         uint32 course_code;    // each subject/course will have unique code
@@ -43,12 +48,13 @@ contract School {
         string _name;
         uint32 staff_id;    // staff will have unique id
         uint8 n_programs;
+        string[] courses;
         program[] programs_offered;  // offered by this prof
         // can add more personal info like contact, degree etc...
     }
 
-    uint32 internal school_strenght = 999;   // to get only 4 digit ids
-    uint32 internal staff_strenght = 999;    // to get only 4 digit ids
+    uint32 internal school_strength = 999;   // to get only 4 digit ids
+    uint32 internal staff_strength = 999;    // to get only 4 digit ids
     string public school_name;
     address internal admin;      // can validate and unenroll students/staff in case situation arises but enrollment is decentralized by student themselves
     uint32 course_counter=100; 
@@ -57,6 +63,7 @@ contract School {
     mapping(address => uint32) internal student_map;    // acct adrs -> stud_id
     mapping(uint32 => Staff) internal all_staff;     // staff_id -> staff info
     mapping(address => uint32) internal staff_map;      // acct adrs -> staff_id
+    mapping(string => CourseData) internal course_data;    // maps string course code to number, can be edited only by admin
 
     // ****************** constructors and modifiers to manage access *********************
 
@@ -80,12 +87,12 @@ contract School {
     }
 
     modifier validStaffId(uint32 _staff_id) {
-        require(_staff_id <= staff_strenght && _staff_id > 999);
+        require(_staff_id <= staff_strength && _staff_id > 999);
         _;
     }
 
     modifier validStudId(uint32 _stud_id) {
-        require(_stud_id <= school_strenght && _stud_id > 999);
+        require(_stud_id <= school_strength && _stud_id > 999);
         _;
     }
 
@@ -110,16 +117,16 @@ contract School {
     // functions to be made:
     // register, enroll, get details, edit details, setmarks, getmarks, add courses, unregister
 
-    function GetSchoolStrenght() public view returns(uint32) {
-        return school_strenght-999;
+    function GetSchoolStrength() public view returns(uint32) {
+        return school_strength-999;
     }
 
-    function GetStaffStrenght() public view returns(uint32) {
-        return staff_strenght-999;
+    function GetStaffStrength() public view returns(uint32) {
+        return staff_strength-999;
     }
     
     function RegisterStudent(string memory _name) public notStudent notStaff returns(uint32) {   // staff also cannot register as student for now
-        uint32 stud_id = ++school_strenght;
+        uint32 stud_id = ++school_strength;
         student_map[msg.sender] = stud_id;
         all_students[stud_id].acct = msg.sender;
         all_students[stud_id]._name = _name;
@@ -135,7 +142,7 @@ contract School {
     }
 
     function RegisterStaff(string memory _name) public notStudent notStaff returns(uint32) {   // staff also cannot register as student for now
-        uint32 staff_id = ++staff_strenght;
+        uint32 staff_id = ++staff_strength;
         staff_map[msg.sender] = staff_id;
         all_staff[staff_id].acct = msg.sender;
         all_staff[staff_id]._name = _name;
@@ -151,26 +158,25 @@ contract School {
         return (all_staff[_staff_id]._name);
     }
     
-    function offer_course(string memory _course,uint32 _id,uint16 max_strength ) public  validStaffId(_id) onlyStaff(_id) {
-        all_staff[_id].n_programs=all_staff[_id].n_programs+1;
+    function offer_course(string memory _course,uint32 _staff_id,uint32 max_strength, string memory desc ) public  validStaffId(_staff_id) onlyStaff(_staff_id) {
+        all_staff[_staff_id].n_programs=all_staff[_staff_id].n_programs+1;
 
-        course_codes[_course]=course_counter++;  //maybe course code could be suggested by prof. themselves
-        all_staff[_id].programs_offered.push(program({course_code: course_codes[_course], max_strength: max_strength, current_strength:0}));
+        course_data[_course].course_id =course_counter++;  //maybe course code could be suggested by prof. themselves
+        course_data[_course].max_strength = max_strength;
+        course_data[_course].staff_id = _staff_id;
+        course_data[_course].description = desc;
+        // all_staff[_staff_id].programs_offered.push(program({course_code: course_data[_course], max_strength: max_strength, current_strength:0}));
         
     }
     
-    function enroll_course(string memory _course,uint32 stud_id,uint32 prof_id) public validStudId(stud_id) onlyStudent(stud_id) returns(uint256) {
-        uint32 i=0;
-        while(course_codes[_course]!=all_staff[prof_id].programs_offered[i].course_code ){
-            require(i<(all_staff[prof_id].programs_offered).length,"No such course available.");
-           i++;
-        }
-       require( all_staff[prof_id].programs_offered[i].current_strength < all_staff[prof_id].programs_offered[i].max_strength, "No more students are being accepted in this course.");
-       all_staff[prof_id].programs_offered[i].current_strength++;
-       uint8 n=all_students[stud_id].n_grades;
-       all_students[stud_id].grades[n].push(course_codes[_course]);
-       all_students[stud_id].n_courses[n]++;  // a limit to number of courses that can be taken and what are available   
-       return  all_students[stud_id].n_courses[n]++;
+    function enroll_course(string memory _course,uint32 stud_id) public validStudId(stud_id) onlyStudent(stud_id) {
+        require(course_data[_course].course_id > 100,"No such course available.");
+        require(course_data[_course].current_strength < course_data[_course].max_strength, "No more students are being accepted in this course.");
+        course_data[_course].current_strength++;
+        // uint8 n=all_students[stud_id].n_grades;
+        // all_students[stud_id].grades[n].push(course_codes[_course]);
+        // all_students[stud_id].n_courses[n]++;  // a limit to number of courses that can be taken and what are available   
+        // return  all_students[stud_id].n_courses[n]++;
     }
     function edit_stud_details(uint32 stud_id,string memory new_name, uint8 new_grade ) public  validStudId(stud_id) onlyStudent(stud_id){
       all_students[stud_id]._name=new_name;
@@ -188,12 +194,12 @@ contract School {
     //     return true;
     // }
      function setMarks(uint32 prof_id,string memory _course,uint32 stud_id, uint256 _marks) public validStaffId(prof_id) onlyStaff(prof_id) {
-        uint32 course_code=course_codes[_course];
+        uint32 course_code = course_data[_course].course_id;
         all_students[stud_id].courses[course_code]=_marks;
      }
 
     function getMarks(uint32 stud_id,string memory _course) public view validStudId(stud_id) onlyStudent(stud_id) returns(uint256 _marks)  {
-        uint32 course_code=course_codes[_course];
+        uint32 course_code=course_data[_course].course_id;
         _marks=all_students[stud_id].courses[course_code];
      }
 
