@@ -23,7 +23,7 @@ contract School {
         string _name;
         uint32 stud_id;     // students will have their unique identity
         uint8 n_grades;
-       mapping(uint8 => uint8[]) grade;  //grade(like 1,2,3...) to course_codes in each grade(like 1,2,3...)
+       mapping(uint8 => uint32[]) grade;  //grade(like 1,2,3...) to course_codes in each grade(like 1,2,3...)
         mapping (uint32 => uint256) marks; //course_code to marks 
     }
 
@@ -175,6 +175,18 @@ contract School {
      
     
    
+    function updateGrade(uint32 _stud_id) internal view returns(bool) {
+        uint8 current_grade = all_students[_stud_id].n_grades-1;
+        uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
+        bool isPass = true;
+        for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
+        return isPass;
+    }
+    
+    function getGrade(uint32 _stud_id) public onlyStudent(_stud_id) returns(uint8) {
+        if(updateGrade(_stud_id)) all_students[_stud_id].n_grades++;
+        return all_students[_stud_id].n_grades;
+    }
 
     // function checkPass(uint256 _marks) public pure returns(bool) {
     //     if(_marks < 33) return false;
