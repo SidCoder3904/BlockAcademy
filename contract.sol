@@ -173,17 +173,25 @@ contract School {
         description=course_data[_course].description;
     }
    
-    function updateGrade(uint32 _stud_id) internal view returns(bool) {
+    
+    function updateGrade() public  onlyAdmin()  {
+        uint32 _stud_id=1000;
+        uint32 _strength=GetSchoolStrength();
+        while(_stud_id<=(1000+_strength)){
         uint8 current_grade = all_students[_stud_id].n_grades-1;
         uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
         bool isPass = true;
         for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
-        return isPass;
+        if(isPass){
+            all_students[_stud_id].n_grades++;
+        }
+        }
     }
     
-    function getGrade(uint32 _stud_id) public onlyStudent(_stud_id) returns(uint8) {
-        if(updateGrade(_stud_id)) all_students[_stud_id].n_grades++;
+    function getGrade(uint32 _stud_id) public view onlyStudent(_stud_id) returns(uint8) {
+        //if(updateGrade(_stud_id)) all_students[_stud_id].n_grades++;
         return all_students[_stud_id].n_grades;
+
     }
 
     // function checkPass(uint256 _marks) public pure returns(bool) {
