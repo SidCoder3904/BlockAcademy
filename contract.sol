@@ -173,7 +173,13 @@ contract School {
       all_staff[prof_id]._name=new_name;
     }
      
-    
+    function get_course_details(string memory _course) public view returns(uint32 course_code,uint32 max_strength,uint32 current_strength,string memory name, string memory description) {
+        course_code = course_data[_course].course_id;
+        max_strength=course_data[_course].max_strength;
+        current_strength=course_data[_course].current_strength;
+        name=all_staff[course_data[_course].staff_id]._name;
+        description=course_data[_course].description;
+    }
    
 
     // function checkPass(uint256 _marks) public pure returns(bool) {
