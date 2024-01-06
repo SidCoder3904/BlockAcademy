@@ -27,7 +27,6 @@ contract School {
         mapping (uint32 => uint256) marks; //course_code to marks 
     }
 
-   
 
     struct Staff {
         address acct;   // maybe we can remove it
@@ -95,8 +94,12 @@ contract School {
         require(student_map[msg.sender] == 0);
         _;
     }
-
     
+    // *************** events for notice of all ********************
+    event CourseOffered(string course_name, string staff_id, uint32 max_strenght, string desc);
+
+    event GradeUpdated();
+
     // *************** functions to access student record ********************
     // to be edited...
     // functions to be made:
@@ -148,6 +151,7 @@ contract School {
         course_data[_course].max_strength = max_strength;
         course_data[_course].staff_id = _staff_id;
         course_data[_course].description = desc;
+        emit CourseOffered(_course, all_staff[_staff_id]._name, max_strength, desc);
         // all_staff[_staff_id].programs_offered.push(program({course_code: course_data[_course], max_strength: max_strength, current_strength:0}));
         
     }
@@ -174,17 +178,16 @@ contract School {
     }
    
     
-    function updateGrade() public  onlyAdmin()  {
+    function updateGrade() public onlyAdmin()  {
         uint32 _stud_id=1000;
         uint32 _strength=GetSchoolStrength();
         while(_stud_id<=(1000+_strength)){
-        uint8 current_grade = all_students[_stud_id].n_grades-1;
-        uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
-        bool isPass = true;
-        for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
-        if(isPass){
-            all_students[_stud_id].n_grades++;
-        }
+            uint8 current_grade = all_students[_stud_id].n_grades-1;
+            uint256 n_courses = all_students[_stud_id].grade[current_grade].length;
+            bool isPass = true;
+            for(uint256 i=0; i<n_courses; i++) if(all_students[_stud_id].grade[current_grade][i]<33) isPass = false;
+            if(isPass) all_students[_stud_id].n_grades++;
+            emit GradeUpdated();
         }
     }
     
