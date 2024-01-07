@@ -40,10 +40,14 @@ def main():
         show_student_page()
 
     # Contact information under the sidebar
+    whatsapp_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/640px-WhatsApp.svg.png"
+    github_logo_url = "https://cdn-icons-png.flaticon.com/512/25/25231.png"
+    email_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Gmail_icon_%282020%29.svg/640px-Gmail_icon_%282020%29.svg.png"
     st.sidebar.markdown("---")
     st.sidebar.subheader("Contact")
-    st.sidebar.write("- Email: [Siddharth Verma](siddharthverma3904@gmail.com)")
-    st.sidebar.write("- GitHub: [GitHub Repo](https://github.com/Sid-3904/Acad_Management_System)")
+    st.sidebar.markdown(f"- <img src='{whatsapp_logo_url}' width='25' height='25' /> &nbsp;[WhatsApp Number](https://wa.me/1234567890)", unsafe_allow_html=True)
+    st.sidebar.markdown(f"- <img src='{github_logo_url}' width='27' height='27' /> [GitHub Repository](https://github.com/Sid-3904/Acad_Management_System)", unsafe_allow_html=True)
+    st.sidebar.markdown(f"- <img src='{email_logo_url}' width='25' height='20' /> &nbsp;[E-Mail Address](mailto:siddharthverma3904@gmail.com)", unsafe_allow_html=True)
 
     # Home Page Footer with CSS modifications
     st.markdown(
@@ -62,7 +66,7 @@ def main():
         }}
         </style>
         <div class="footer">
-            <p>&copy; 2023 Academic Management System. All rights reserved.</p>
+            <p>&copy; 2024 Academic Management System. All rights reserved.</p>
         </div>
         """,
         unsafe_allow_html=True
@@ -70,7 +74,27 @@ def main():
 
 def show_home_page():
     st.markdown("**Welcome to the Academic Management System home page.**")
-    # Add content specific to the home page
+    st.markdown("**Made possible with:**")
+
+    # Ethereum Logo
+    ethereum_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ethereum_logo_2014.svg/256px-Ethereum_logo_2014.svg.png"
+
+    # Solidity Logo
+    solidity_logo = "https://cdn.icon-icons.com/icons2/2107/PNG/512/file_type_solidity_icon_130156.png"
+
+    # Python Logo
+    python_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png"
+
+    # Streamlit Logo
+    streamlit_logo = "https://streamlit.io/images/brand/streamlit-mark-color.png"
+
+    # Display logos side by side
+    logos_col = st.columns(4)  # You can adjust the number of columns based on your preference
+
+    logo_sizes = [100, 170, 160, 250]  # Adjust the sizes as needed
+
+    for col, logo, size in zip(logos_col, [ethereum_logo, solidity_logo, python_logo, streamlit_logo], logo_sizes):
+        col.image(logo, caption='', width=size)
 
 def show_admin_page():
     st.write("**Welcome to the Admin page.**")
