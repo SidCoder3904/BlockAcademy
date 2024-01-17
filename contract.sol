@@ -118,30 +118,36 @@ contract School {
         return staff_strength-999;
     }
     
-    function RegisterStudent(string memory _name) public notStudent notStaff returns(uint32) {   // staff also cannot register as student for now
+    function RegisterStudent(string memory _name) public notStudent notStaff {   // staff also cannot register as student for now
         uint32 stud_id = ++school_strength;
         student_map[msg.sender] = stud_id;
         all_students[stud_id].acct = msg.sender;
         all_students[stud_id]._name = _name;
         all_students[stud_id].stud_id = stud_id;
         all_students[stud_id].n_grades = 1;
-        
-        return stud_id;
         // add time lock so that someone else might not be able to edit the blockchain at same time
+    }
+
+    function GetStudentId() public view returns(uint32) {
+        require(student_map[msg.sender] != 0);
+        return student_map[msg.sender];
+    }
+
+    function GetStaffId() public view returns(uint32) {
+        require(staff_map[msg.sender] != 0);
+        return staff_map[msg.sender];
     }
 
     function GetStudentDetails(uint32 _stud_id) public view validStudId(_stud_id) onlyStudent(_stud_id) returns(string memory) {
         return (all_students[_stud_id]._name);
     }
 
-    function RegisterStaff(string memory _name) public notStudent notStaff returns(uint32) {   // staff also cannot register as student for now
+    function RegisterStaff(string memory _name) public notStudent notStaff {   // staff also cannot register as student for now
         uint32 staff_id = ++staff_strength;
         staff_map[msg.sender] = staff_id;
         all_staff[staff_id].acct = msg.sender;
         all_staff[staff_id]._name = _name;
         all_staff[staff_id].staff_id = staff_id;
-        
-        return staff_id;
         // add time lock so that someone else might not be able to edit the blockchain at same time
     }
 
