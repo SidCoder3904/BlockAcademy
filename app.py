@@ -442,16 +442,45 @@ def main():
             "nav-link-selected": {"background-color": "#02ab21"},}
                     
                     )
-    if site == "Home":
+    #if site == "Home":
+        #home.home_page()
+    #if site == "Admin":
+        #admin.admin_page()
+    #if site == "Teacher":
+        #teacher.teacher_page(contract)       
+    #if site == 'Student':
+        #student.student_page(contract)
+    #if site == 'Register':
+        #student.register_page(contract)
+
+    if 'login' not in st.session_state:
+        st.session_state.login = False
+
+    if 'staff_address' not in st.session_state:
+        st.session_state.staff_address = False
+
+    if app == "Home":
         home.home_page()
-    if site == "Admin":
-        admin.admin_page()
-    if site == "Teacher":
-        teacher.teacher_page(contract)       
-    if site == 'Student':
-        student.student_page(contract)
-    if site == 'Register':
-        student.register_page(contract)
+    elif app == "Admin":
+        admin.admin_page(contract)
+    elif app == "Teacher":
+        st.session_state.staff_address = teacher.teacher_page(contract)
+        if st.session_state.staff_address: 
+            st.session_state.login = True
+
+    elif app == "Teacher Functions":
+        if st.session_state.login:
+            st.write("Logged in successfully")
+            teacher_functions.teacher_functions(contract, st.session_state.staff_address)
+        else:
+            st.write("Please login first.")
+    elif app == "Register Staff":
+        registerstaff.staff_functions_page(contract)
+    elif app == "Register Student":
+        register.register_page(contract)
+    elif app == 'Student':
+        student.student_page(contract)	
+	
     # Contact information under the sidebar
     whatsapp_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/640px-WhatsApp.svg.png"
     github_logo_url = "https://cdn-icons-png.flaticon.com/512/25/25231.png"
