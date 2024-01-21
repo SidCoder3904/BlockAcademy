@@ -1,16 +1,16 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import home, admin, teacher, student, register
+import home, admin, teacher, student, registerstaff,register, teacher_functions, time
 from web3 import Web3
 
 login_successful=False
-site = "home"
-ganache_url = "http://127.0.0.1:7545"
-w3 = Web3(Web3.HTTPProvider(ganache_url))
-# print(w3.is_connected())
-# print(w3.eth.block_number)
 
-abi = """[
+ganache_url = "HTTP://127.0.0.1:7545"  # Replace with your Ganache URL
+web3 = Web3(Web3.HTTPProvider(ganache_url))
+
+    # Replace with your deployed contract address and ABI
+contract_address = "0x53A77A33fC05B3f5c667FD7bEDA2A48634f3E2C3"  # Replace with your contract's address
+contract_abi =  [
 	{
 		"inputs": [
 			{
@@ -23,28 +23,28 @@ abi = """[
 		"type": "constructor"
 	},
 	{
-		"anonymous": false,
+		"anonymous": False,
 		"inputs": [
 			{
-				"indexed": false,
+				"indexed": False,
 				"internalType": "string",
 				"name": "course_name",
 				"type": "string"
 			},
 			{
-				"indexed": false,
+				"indexed": False,
 				"internalType": "uint32",
 				"name": "staff_id",
 				"type": "uint32"
 			},
 			{
-				"indexed": false,
+				"indexed": False,
 				"internalType": "uint32",
 				"name": "max_strength",
 				"type": "uint32"
 			},
 			{
-				"indexed": false,
+				"indexed": False,
 				"internalType": "string",
 				"name": "desc",
 				"type": "string"
@@ -54,258 +54,10 @@ abi = """[
 		"type": "event"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "prof_id",
-				"type": "uint32"
-			},
-			{
-				"internalType": "string",
-				"name": "new_name",
-				"type": "string"
-			}
-		],
-		"name": "edit_prof_details",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "stud_id",
-				"type": "uint32"
-			},
-			{
-				"internalType": "string",
-				"name": "new_name",
-				"type": "string"
-			},
-			{
-				"internalType": "uint8",
-				"name": "new_grade",
-				"type": "uint8"
-			}
-		],
-		"name": "edit_stud_details",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_course",
-				"type": "string"
-			},
-			{
-				"internalType": "uint32",
-				"name": "stud_id",
-				"type": "uint32"
-			}
-		],
-		"name": "enroll_course",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"anonymous": false,
+		"anonymous": False,
 		"inputs": [],
 		"name": "GradeUpdated",
 		"type": "event"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_course",
-				"type": "string"
-			},
-			{
-				"internalType": "uint32",
-				"name": "_staff_id",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "max_strength",
-				"type": "uint32"
-			},
-			{
-				"internalType": "string",
-				"name": "desc",
-				"type": "string"
-			}
-		],
-		"name": "offer_course",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_name",
-				"type": "string"
-			}
-		],
-		"name": "RegisterStaff",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_name",
-				"type": "string"
-			}
-		],
-		"name": "RegisterStudent",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "bool",
-				"name": "is_stud",
-				"type": "bool"
-			},
-			{
-				"internalType": "uint32",
-				"name": "id",
-				"type": "uint32"
-			}
-		],
-		"name": "Remove",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "prof_id",
-				"type": "uint32"
-			},
-			{
-				"internalType": "string",
-				"name": "_course",
-				"type": "string"
-			},
-			{
-				"internalType": "uint32",
-				"name": "stud_id",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_marks",
-				"type": "uint256"
-			}
-		],
-		"name": "setMarks",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "updateGrade",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_course",
-				"type": "string"
-			}
-		],
-		"name": "get_course_details",
-		"outputs": [
-			{
-				"internalType": "uint32",
-				"name": "course_code",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "max_strength",
-				"type": "uint32"
-			},
-			{
-				"internalType": "uint32",
-				"name": "current_strength",
-				"type": "uint32"
-			},
-			{
-				"internalType": "string",
-				"name": "name",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "description",
-				"type": "string"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "_stud_id",
-				"type": "uint32"
-			}
-		],
-		"name": "getGrade",
-		"outputs": [
-			{
-				"internalType": "uint8",
-				"name": "",
-				"type": "uint8"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint32",
-				"name": "stud_id",
-				"type": "uint32"
-			},
-			{
-				"internalType": "string",
-				"name": "_course",
-				"type": "string"
-			}
-		],
-		"name": "getMarks",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "_marks",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
 	},
 	{
 		"inputs": [],
@@ -398,6 +150,219 @@ abi = """[
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			}
+		],
+		"name": "RegisterStaff",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			}
+		],
+		"name": "RegisterStudent",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "is_stud",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint32",
+				"name": "id",
+				"type": "uint32"
+			}
+		],
+		"name": "Remove",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "prof_id",
+				"type": "uint32"
+			},
+			{
+				"internalType": "string",
+				"name": "new_name",
+				"type": "string"
+			}
+		],
+		"name": "edit_prof_details",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "stud_id",
+				"type": "uint32"
+			},
+			{
+				"internalType": "string",
+				"name": "new_name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint8",
+				"name": "new_grade",
+				"type": "uint8"
+			}
+		],
+		"name": "edit_stud_details",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_course",
+				"type": "string"
+			},
+			{
+				"internalType": "uint32",
+				"name": "stud_id",
+				"type": "uint32"
+			}
+		],
+		"name": "enroll_course",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "_stud_id",
+				"type": "uint32"
+			}
+		],
+		"name": "getGrade",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "stud_id",
+				"type": "uint32"
+			},
+			{
+				"internalType": "string",
+				"name": "_course",
+				"type": "string"
+			}
+		],
+		"name": "getMarks",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "_marks",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_course",
+				"type": "string"
+			}
+		],
+		"name": "get_course_details",
+		"outputs": [
+			{
+				"internalType": "uint32",
+				"name": "course_code",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "max_strength",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "current_strength",
+				"type": "uint32"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "_course",
+				"type": "string"
+			},
+			{
+				"internalType": "uint32",
+				"name": "_staff_id",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint32",
+				"name": "max_strength",
+				"type": "uint32"
+			},
+			{
+				"internalType": "string",
+				"name": "desc",
+				"type": "string"
+			}
+		],
+		"name": "offer_course",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "school_name",
 		"outputs": [
@@ -409,11 +374,49 @@ abi = """[
 		],
 		"stateMutability": "view",
 		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint32",
+				"name": "prof_id",
+				"type": "uint32"
+			},
+			{
+				"internalType": "string",
+				"name": "_course",
+				"type": "string"
+			},
+			{
+				"internalType": "uint32",
+				"name": "stud_id",
+				"type": "uint32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_marks",
+				"type": "uint256"
+			}
+		],
+		"name": "setMarks",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "updateGrade",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
 	}
-]"""
-contract = w3.eth.contract(address = "0xfeD659777Ea84CF51Ca1B34c02fb38c3601C6c33", abi = abi)
+]
+
+    # Instantiate the contract
+contract = web3.eth.contract(address=contract_address, abi=contract_abi)
 
 def main():
+
     global login_successful
     st.set_page_config(page_title="AMS", page_icon=":books:", layout="wide")
 
@@ -429,30 +432,20 @@ def main():
     )
 
     with st.sidebar:
-        site = option_menu(
+        app = option_menu(
                     menu_title='Navigation',
-                    options=['Home','Admin','Teacher','Student'],
-                    icons=['house-fill','person-circle','book','mortarboard'],
+                    options=['Home','Admin','Teacher','Teacher Functions','Register Staff','Register Student','Student'],
+                    icons=['house-fill','person-circle','book','book','wallet-outline','person-circle','mortarboard'],
                     menu_icon='arrow-up-right-square-fill',
                     default_index=1,
                     styles={
                         "container": {"padding": "5!important","background-color":'black'},
             "icon": {"color": "white", "font-size": "20px"}, 
             "nav-link": {"color":"white","font-size": "15px", "text-align": "left", "margin":"0px", "--hover-color": "blue"},
-            "nav-link-selected": {"background-color": "#02ab21"},}
-                    
-                    )
-    #if site == "Home":
-        #home.home_page()
-    #if site == "Admin":
-        #admin.admin_page()
-    #if site == "Teacher":
-        #teacher.teacher_page(contract)       
-    #if site == 'Student':
-        #student.student_page(contract)
-    #if site == 'Register':
-        #student.register_page(contract)
-
+            "nav-link-selected": {"background-color": "#02ab21"},
+            "nav-link-selected": {"background-color": "#02ab21"}}
+                        )
+   
     if 'login' not in st.session_state:
         st.session_state.login = False
 
@@ -479,8 +472,7 @@ def main():
     elif app == "Register Student":
         register.register_page(contract)
     elif app == 'Student':
-        student.student_page(contract)	
-	
+        student.student_page(contract)
     # Contact information under the sidebar
     whatsapp_logo_url = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/WhatsApp.svg/640px-WhatsApp.svg.png"
     github_logo_url = "https://cdn-icons-png.flaticon.com/512/25/25231.png"
