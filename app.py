@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import home, admin, teacher, student, registerstaff,register, teacher_functions, time
+import home, admin, teacher, student, register_staff,register, teacher_functions, time
 from web3 import Web3
 
 login_successful=False
@@ -424,7 +424,7 @@ def main():
     st.markdown(
         f"""
         <div style='display: flex; align-items: center; padding: 0; background-color: {st.get_option("theme.backgroundColor")};'>
-            <h1 style='flex: 1; margin: 0;'>Academic Management System</h1>
+            <h1 style='flex: 1; margin: 0;'>BlockAcademy</h1>
             <img src='https://www.codester.com/static/uploads/items/000/008/8870/icon.png' width='100' alt='AMS Logo'>
         </div>
         """,
@@ -455,7 +455,7 @@ def main():
     if app == "Home":
         home.home_page()
     elif app == "Admin":
-        admin.admin_page(contract)
+        admin.admin_page()
     elif app == "Teacher":
         st.session_state.staff_address = teacher.teacher_page(contract)
         if st.session_state.staff_address: 
@@ -468,7 +468,7 @@ def main():
         else:
             st.write("Please login first.")
     elif app == "Register Staff":
-        registerstaff.staff_functions_page(contract)
+        register_staff.staff_functions_page(contract)
     elif app == "Register Student":
         register.register_page(contract)
     elif app == 'Student':
@@ -500,7 +500,7 @@ def main():
         }}
         </style>
         <div class="footer">
-            <p>&copy; 2024 Academic Management System. All rights reserved.</p>
+            <p>&copy; 2024 BlockAcademy. All rights reserved.</p>
         </div>
         """,
         unsafe_allow_html=True
