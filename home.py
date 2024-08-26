@@ -1,7 +1,7 @@
 import streamlit as st
 
 def home_page():
-    st.markdown("**Welcome to the Academic Management System home page.**")
+    st.markdown("**Welcome to the BlockAcademy home page.**")
     st.markdown("**Made possible with:**")
 
     # Ethereum Logo
